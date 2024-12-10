@@ -51,7 +51,7 @@ async function handleSubmit(event) {
     toLoader(true);
 
     try {
-        const data = await pixabayApi(searchQuery, page, per_page);
+        const data = await pixabayApi({searchQuery, page, per_page});
 
         if (data.total === 0) {
             iziToast.error({
@@ -86,7 +86,7 @@ async function handleClickOn() {
     loadMoreBtn.disabled = true;
 
     try {
-        const data = await pixabayApi(searchQuery, page, per_page);
+        const data = await pixabayApi({searchQuery, page, per_page});
         renderGallery(data.hits);
         
         if (page >= totalPages) {
