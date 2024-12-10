@@ -31,7 +31,7 @@ function toLoader(show) {
     }
 };
 
-function handleSubmit(event) {
+async function handleSubmit(event) {
     event.preventDefault();
 
     searchQuery = event.target.elements.user_query.value.trim();
@@ -50,32 +50,33 @@ function handleSubmit(event) {
     loadMoreBtn.classList.replace("load-more", "hidden");
     toLoader(true);
 
-    pixabayApi(searchQuery, page, per_page)
-        .then((data) => {
-            if (data.total === 0) {
-                iziToast.error({
-                    message: 'Sorry, there are no images matching your search query. Please try again!',
-                    position: 'topRight',
-                });
-                return;
-            }
-            renderGallery(data.hits);
-            totalPages = Math.ceil(data.totalHits / per_page);
+    try {
+        const data = await pixabayApi(searchQuery, page, per_page);
 
-            if (page < totalPages) {
-                loadMoreBtn.classList.replace("hidden", "load-more")
-            }
-        })
-        .catch((error) => {
-            console.log(error.message);
-        iziToast.error({
-                message: 'Failed to fetch images. Please try again later.',
+        if (data.total === 0) {
+            iziToast.error({
+                message: 'Sorry, there are no images matching your search query. Please try again!',
                 position: 'topRight',
             });
-        })
-        .finally(() => {
-            toLoader(false);
-    })
+            return;
+        };
+
+        renderGallery(data.hits);
+        totalPages = Math.ceil(data.totalHits / per_page);
+
+        if (page < totalPages) {
+            loadMoreBtn.classList.replace("hidden", "load-more");
+        };
+    }
+    catch (error) {
+        iziToast.error({
+            message: 'Failed to fetch images. Please try again later.',
+            position: 'topRight',
+        });
+    } finally {
+        toLoader(false);
+    }
+
     event.target.elements.user_query.value = "";
 }
 
